@@ -1,0 +1,11 @@
+/**
+ * Configs
+ */
+ // Twitter
+exports.TWITTER_CONSUMER_KEY = 'your twitter consumer key';
+exports.TWITTER_CONSUMER_SECRET = 'your twitter consumer secret';
+exports.TWITTER_ACCESS_TOKEN_KEY = 'your twitter access token key';
+exports.TWITTER_ACCESS_TOKEN_SECRET = 'your twitter access token secret';
+
+// Session
+exports.SESSION_SECRET = 'your session secret';
