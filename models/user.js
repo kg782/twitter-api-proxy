@@ -4,7 +4,8 @@ var Schema = mongoose.Schema;
 var userSchema = new Schema({
   id: {type: String, required: true, unique: true},
   username: {type: String, required: true, unique: true},
-  displayName: {type: String, required: true}
+  displayName: {type: String, required: true},
+  provider: String
 });
 
 // Static methods
@@ -20,13 +21,16 @@ userSchema.statics.findOrCreate = function(profile, callback) {
   User.findById(profile.id, function(err, user) {
     if (err) callback(err);
     if (user) {
-      user.update(profile);
+      user.update(profile, function(err, numberAffected, rawResponse) {
+        if (err) callback(err);
+        user.save();
+        callback(null, user);
+      });
     } else {
       user = new User(profile);
-      console.log('user', user);
+      user.save();
+      callback(null, user);
     }
-    user.save();
-    callback(null, user);
   });
 };
 
