@@ -33,7 +33,7 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new TwitterStrategy({
     consumerKey: configs.TWITTER_CONSUMER_KEY,
     consumerSecret: configs.TWITTER_CONSUMER_SECRET,
-    callbackURL: "http://127.0.0.1:9000/twitter/callback"
+    callbackURL: configs.SITE_DOMAIN + '/twitter/callback'
   },
   function(token, tokenSecret, profile, done) {
     profile.token = token;
@@ -65,34 +65,16 @@ if ('development' == app.get('env')) {
 }
 
 // Twitter login
-app.get('/twitter/login', passport.authenticate('twitter'));
-app.get('/twitter/callback',
-  passport.authenticate('twitter', {failureRedirect: '/'}),
-  function(req, res) {
-    res.redirect('/');
-  }
-);
-app.get('/twitter/logout', function(req, res){
-  req.logout();
-  res.redirect('/');
-});
+app.get('/twitter/login', twitter.login);
+app.get('/twitter/callback', twitter.authenticate, twitter.callback);
+app.get('/twitter/authenticated', twitter.authenticated);
+app.get('/twitter/logout', twitter.logout);
 app.get('/twitter/error-auth', twitter.errorAuth);
 
 // Twitter API
-app.all('/twitter/rest/*', ensureAuthenticated, twitter.rest);
+app.all('/twitter/rest/*', twitter.ensureAuthenticated, twitter.rest);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-// Simple route middleware to ensure user is authenticated.
-//   Use this route middleware on any resource that needs to be protected.  If
-//   the request is authenticated (typically via a persistent login session),
-//   the request will proceed.  Otherwise, the user will be redirected to the
-//   login page.
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/twitter/error-auth');
-}
