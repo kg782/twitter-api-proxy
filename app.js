@@ -11,6 +11,7 @@ var configs = require('./configs');
 var MongoStore = require('connect-mongo')(express);
 var passport = require('passport');
 var TwitterStrategy = require('passport-twitter').Strategy;
+var mongoose = require('mongoose');
 
 var app = express();
 
@@ -22,12 +23,24 @@ var app = express();
 //   have a database of user records, the complete Twitter profile is serialized
 //   and deserialized.
 passport.serializeUser(function(user, done) {
-  done(null, user);
+  done(null, user.id);
 });
 
-passport.deserializeUser(function(obj, done) {
-  done(null, obj);
+passport.deserializeUser(function(id, done) {
+  if (id) {
+    var User = mongoose.model('User');
+    User.findById(id, function(err, user) {
+      done(err, user);
+    });
+  }
 });
+
+// mongoose setup
+mongoose.connect(configs.MONGO_DB_URL);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function callback () {console.log('mongoose connected');});
+require('./models/user');
 
 // Passport settings
 passport.use(new TwitterStrategy({
@@ -38,8 +51,9 @@ passport.use(new TwitterStrategy({
   function(token, tokenSecret, profile, done) {
     profile.token = token;
     profile.tokenSecret = tokenSecret;
-    process.nextTick(function () {
-      return done(null, profile);
+    var User = mongoose.model('User');
+    User.findOrCreate(profile, function(err, user) {
+      return done(null, user);
     });
   }
 ));
@@ -57,7 +71,6 @@ app.use(express.session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(app.router);
-//app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 if ('development' == app.get('env')) {

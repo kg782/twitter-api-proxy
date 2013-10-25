@@ -37,8 +37,6 @@ exports.errorAuth = function(req, res) {
 
 exports.rest = function(req, res) {
 
-  console.log(req.session);
-
   var twit = new Twitter({
     consumer_key: configs.TWITTER_CONSUMER_KEY,
     consumer_secret: configs.TWITTER_CONSUMER_SECRET,
