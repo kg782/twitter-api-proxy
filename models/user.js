@@ -5,7 +5,10 @@ var userSchema = new Schema({
   id: {type: String, required: true, unique: true},
   username: {type: String, required: true, unique: true},
   displayName: {type: String, required: true},
-  provider: String
+  photos: [],
+  provider: String,
+  token: String,
+  tokenSecret: String
 });
 
 // Static methods
