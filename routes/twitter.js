@@ -35,23 +35,26 @@ exports.errorAuth = function(req, res) {
   });
 };
 
-exports.rest = function(req, res) {
+exports.restGet = function(req, res) {
 
   var twit = new Twitter({
     consumer_key: configs.TWITTER_CONSUMER_KEY,
     consumer_secret: configs.TWITTER_CONSUMER_SECRET,
-    access_token_key: req.session.passport.user.token,
-    access_token_secret: req.session.passport.user.tokenSecret
+    access_token_key: req.user.token,
+    access_token_secret: req.user.tokenSecret
   });
 
   var paths = req.path.split('/');
-  if (paths.length >= 4 && twit[paths[3]]) {
-    twit[paths[3]](function (err, data) {
+  if (paths.length >= 5) {
+    paths.splice(0, 4);
+    var url = '/' + paths.join('/');
+    console.log('Get request, url:', url, ', req.params:', req.params);
+    twit.get(url, req.params, function(err, data) {
+      if (err) res.send({is_success:false, error:'Couldn\'t get data'});
+      if (!data) {
+        data = {};
+      }
       res.send(data);
-    });
-  } else {
-    res.send({
-      error: 'Error: mothod not found'
     });
   }
 };

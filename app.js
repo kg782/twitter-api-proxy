@@ -85,7 +85,7 @@ app.get('/twitter/logout', twitter.logout);
 app.get('/twitter/error-auth', twitter.errorAuth);
 
 // Twitter API
-app.all('/twitter/rest/*', twitter.ensureAuthenticated, twitter.rest);
+app.get('/twitter/rest/*', twitter.ensureAuthenticated, twitter.restGet);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
