@@ -1,11 +1,21 @@
-/**
- * Configs
- */
- // Twitter
-exports.TWITTER_CONSUMER_KEY = 'your twitter consumer key';
-exports.TWITTER_CONSUMER_SECRET = 'your twitter consumer secret';
-exports.TWITTER_ACCESS_TOKEN_KEY = 'your twitter access token key';
-exports.TWITTER_ACCESS_TOKEN_SECRET = 'your twitter access token secret';
+// General
+exports.SITE_URL = 'http://127.0.0.1:9000';
+exports.API_PATH = '/twitter';
 
-// Session
-exports.SESSION_SECRET = 'your session secret';
+// Twitter
+exports.TWITTER_CONSUMER_KEY = '';
+exports.TWITTER_CONSUMER_SECRET = '';
+
+// Cookie
+exports.COOKIE_SECRET = '';
+
+// MongoDB
+exports.MONGO_DB = {
+    db: 'twitter_proxy'
+    // host: '127.0.0.1',
+    // port: 27017,
+    // username: '',
+    // password: '',
+    // collection: ''
+};
+exports.MONGO_DB_URL = 'mongodb://localhost/twitter_proxy';
