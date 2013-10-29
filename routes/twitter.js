@@ -15,7 +15,7 @@ exports.logout = function(req, res){
   });
 };
 exports.authenticated = function(req, res) {
-  res.send({authenticated:req.isAuthenticated()});
+  res.send({authenticated:req.isAuthenticated(), user: req.user._json});
 };
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -45,17 +45,44 @@ exports.restGet = function(req, res) {
   });
 
   var paths = req.path.split('/');
-  if (paths.length >= 5) {
-    paths.splice(0, 4);
+  if (paths.length >= 4) {
+    paths.splice(0, 3);
     var url = '/' + paths.join('/');
-    console.log('Get request, url:', url, ', req.params:', req.params);
-    twit.get(url, req.params, function(err, data) {
-      if (err) res.send({is_success:false, error:'Couldn\'t get data'});
-      if (!data) {
-        data = {};
+    console.log('Get request, url:', url, ', params:', req.query);
+    twit.get(url, req.query, function(err, data) {
+      if (err) {
+        res.status(err.statusCode).send(err);
+        return;
       }
-      res.send(data);
+      res.send(data || {});
     });
   }
 };
+
+exports.restPost = function(req, res) {
+
+  var twit = new Twitter({
+    consumer_key: configs.TWITTER_CONSUMER_KEY,
+    consumer_secret: configs.TWITTER_CONSUMER_SECRET,
+    access_token_key: req.user.token,
+    access_token_secret: req.user.tokenSecret
+  });
+
+  console.log("@@@", req.user.token, req.user.tokenSecret);
+
+  var paths = req.path.split('/');
+  if (paths.length >= 4) {
+    paths.splice(0, 3);
+    var url = '/' + paths.join('/');
+    console.log('Post request, url:', url, ', content:', req.body);
+    twit.post(url, req.body, null, function(err, data) {
+      if (err) {
+        res.status(err.statusCode).send(err);
+        return;
+      }
+      res.send(data || {});
+    });
+  }
+};
+
 

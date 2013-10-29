@@ -8,7 +8,8 @@ var userSchema = new Schema({
   photos: [],
   provider: String,
   token: String,
-  tokenSecret: String
+  tokenSecret: String,
+  _json: {}
 });
 
 // Static methods

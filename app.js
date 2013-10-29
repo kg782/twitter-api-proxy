@@ -46,7 +46,7 @@ require('./models/user');
 passport.use(new TwitterStrategy({
     consumerKey: configs.TWITTER_CONSUMER_KEY,
     consumerSecret: configs.TWITTER_CONSUMER_SECRET,
-    callbackURL: configs.SITE_DOMAIN + '/twitter/callback'
+    callbackURL: configs.SITE_URL + '/twitter/callback'
   },
   function(token, tokenSecret, profile, done) {
     profile.token = token;
@@ -86,6 +86,7 @@ app.get('/twitter/error-auth', twitter.errorAuth);
 
 // Twitter API
 app.get('/twitter/rest/*', twitter.ensureAuthenticated, twitter.restGet);
+app.post('/twitter/rest/*', twitter.ensureAuthenticated, twitter.restPost);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
