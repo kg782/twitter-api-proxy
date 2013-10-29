@@ -71,6 +71,7 @@ app.use(express.session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(app.router);
+app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 if ('development' == app.get('env')) {
@@ -78,15 +79,15 @@ if ('development' == app.get('env')) {
 }
 
 // Twitter login
-app.get('/twitter/login', twitter.login);
-app.get('/twitter/callback', twitter.authenticate, twitter.callback);
-app.get('/twitter/authenticated', twitter.authenticated);
-app.get('/twitter/logout', twitter.logout);
-app.get('/twitter/error-auth', twitter.errorAuth);
+app.get(configs.API_PATH + '/login', twitter.login);
+app.get(configs.API_PATH + '/callback', twitter.authenticate, twitter.callback);
+app.get(configs.API_PATH + '/authenticated', twitter.authenticated);
+app.get(configs.API_PATH + '/logout', twitter.logout);
+app.get(configs.API_PATH + '/error-auth', twitter.errorAuth);
 
 // Twitter API
-app.get('/twitter/rest/*', twitter.ensureAuthenticated, twitter.restGet);
-app.post('/twitter/rest/*', twitter.ensureAuthenticated, twitter.restPost);
+app.get(configs.API_PATH + '/rest/*', twitter.ensureAuthenticated, twitter.restGet);
+app.post(configs.API_PATH + '/rest/*', twitter.ensureAuthenticated, twitter.restPost);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
