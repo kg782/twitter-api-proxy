@@ -17,7 +17,8 @@ exports.logout = function(req, res){
   });
 };
 exports.authenticated = function(req, res) {
-  res.send({authenticated:req.isAuthenticated(), user: req.user._json});
+  var user = req.user ? req.user._json : null;
+  res.send({authenticated:req.isAuthenticated(), user: user});
 };
 exports.ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
