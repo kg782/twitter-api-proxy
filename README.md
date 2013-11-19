@@ -11,7 +11,7 @@ Currently, this supports only Twitter REST API but will support streaming API wi
 
 * Call any REST API from front-end and return the result.
 * In case of getting an error, it returns error data from the API with HTTP status code.
-* Hide OAuth credential from front-end.
+* Hide OAuth credentials from front-end.
 * Keep authentication in session.
 * Store access token in local database so that this server remember it after restarting.
 * Store user data in local database.
