@@ -126,46 +126,50 @@ sockets.configure('development', function() {
 });
 
 sockets.configure(function (){
-  sockets.set('authorization', function(data, accept) {
-    // check if there's a cookie header
-    if (data.headers.cookie) {
-        // if there is, parse the cookie
-        var cookies = cookie.parse(decodeURIComponent(data.headers.cookie));
-        data.cookie = connect.utils.parseSignedCookies(cookies, configs.COOKIE_SECRET);
-        
-        // note that you will need to use the same key to grad the
-        // session id, as you specified in the Express setup.
-        data.sessionID = data.cookie['connect.sid'];
-        sessionStore.get(data.sessionID, function(err, session) {
-          if (err || !session) {
-            return accept('No session existed', false);
-          } else {
-            data.session = session;
-
-            if (!session.passport || !session.passport.user) {
-              return accept('No passport user', false);
-            } else {
-              var userId = session.passport.user;
-              passport.deserializeUser(userId, function(err, user) {
-                if (err || !user) {
-                  return accept('No user stored', false);
-                } else {
-                  data.user = user;
-
-                  // accept the incoming connection
-                  accept(null, true);
-                }
-              });
-            }
-          }
-        });
-      } else {
-       // if there isn't, turn down the connection with a message
-       // and leave the function.
-       return accept('No cookie transmitted.', false);
-     }
-  });
+  sockets.of(configs.API_PATH + '/statuses/filter').authorization(checkAuthorization);
+  sockets.of(configs.API_PATH + '/user').authorization(checkAuthorization);
+  sockets.of(configs.API_PATH + '/site').authorization(checkAuthorization);
 });
+
+function checkAuthorization(handshakeData, callback) {
+  // check if there's a cookie header
+  if (handshakeData.headers.cookie) {
+    // if there is, parse the cookie
+    var cookies = cookie.parse(decodeURIComponent(handshakeData.headers.cookie));
+    handshakeData.cookie = connect.utils.parseSignedCookies(cookies, configs.COOKIE_SECRET);
+    
+    // note that you will need to use the same key to grad the
+    // session id, as you specified in the Express setup.
+    handshakeData.sessionID = handshakeData.cookie['connect.sid'];
+    sessionStore.get(handshakeData.sessionID, function(err, session) {
+      if (err || !session) {
+        return callback('No session existed', false);
+      } else {
+        handshakeData.session = session;
+
+        if (!session.passport || !session.passport.user) {
+          return callback('No passport user', false);
+        } else {
+          var userId = session.passport.user;
+          passport.deserializeUser(userId, function(err, user) {
+            if (err || !user) {
+              return callback('No user stored', false);
+            } else {
+              handshakeData.user = user;
+
+              // callback the incoming connection
+              callback(null, true);
+            }
+          });
+        }
+      }
+    });
+  } else {
+    // if there isn't, turn down the connection with a message
+    // and leave the function.
+    return callback('No cookie transmitted.', false);
+  }
+}
 
 sockets.of(configs.API_PATH + '/statuses/filter').on('connection', twitter.stream);
 sockets.of(configs.API_PATH + '/user').on('connection', twitter.stream);

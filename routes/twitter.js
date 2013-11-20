@@ -101,8 +101,9 @@ exports.streamStatusesSample = function(socket) {
   console.log('A socket with socketId ' + socket.id + ' joined to statuses/sample!');
 
   if (!statusesSampleStream) {
+    console.log('Establish status/sample streaming');
     statusesSampleStream = establishStreaming(
-      socket.of(configs.API_PATH + '/statuses/sample'),
+      socket.namespace,
       'statuses/sample',
       null,
       configs.TWITTER_ACCESS_TOKEN,
@@ -110,7 +111,7 @@ exports.streamStatusesSample = function(socket) {
   }
 
   socket.on('disconnect', function() {
-    console.log('A socket with socketId ' + socket.id + ' left to statuses/sample!!');
+    console.log('A socket with socketId ' + socket.id + ' left to statuses/sample!');
   });
 };
 
