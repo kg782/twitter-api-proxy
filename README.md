@@ -1,6 +1,8 @@
 # Twitter API Proxy
 
-`Twitter API Proxy` is a proxy server to `Twitter API` for pure front-end framework such as `Angular.js`. The concept is to separate front-end client completely from back-end. It supports Twitter `REST API` and `Streaming API`. Streaming data is streamed via `WebSocket` on `Socket.IO` in real time.
+`Twitter REST API v1.1` requires OAuth for every endpoints so you no longer be able to call it from front-end directly. Additionaly, `Twitter Streaming API` needs to be converted in browser compatible protocol such as `WebSocket` to get data in real-time. This proxy server solves those problems.
+
+`Twitter API Proxy` is designed for pure front-end framework such as `Angular.js`. The concept is to separate front-end client completely from back-end. It supports Twitter `REST API` and `Streaming API`. Streaming data is streamed via `WebSocket` on `Socket.IO` in real time.
 
 ## Requirements
 
