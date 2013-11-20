@@ -4,12 +4,12 @@ Twitter API proxy for pure front-end framework such as `Angular.js`. The concept
 
 ## Requirements
 
-* Node.js
-* MongoDB
+* [Node.js](http://nodejs.org/)
+* [MongoDB](http://www.mongodb.org/)
 
 ## Install
 
-1. Install `npm` dependencies.
+1. Install `npm` dependencies in project directory.
 
   ```
   npm install
