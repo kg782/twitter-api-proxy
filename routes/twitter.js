@@ -84,7 +84,6 @@ exports.stream = function(socket) {
 
   var method = socket.namespace.name.replace(configs.API_PATH + '/', '');
 
-  console.log('method', method);
   socket.on('get', function(data) {
     establishStreaming(socket, method, data, socket.handshake.user.token, socket.handshake.user.tokenSecret);
   });

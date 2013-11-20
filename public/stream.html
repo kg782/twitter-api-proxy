@@ -3,37 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Streamin API Test</title>
+  <title>Streamin API</title>
   <script src="scripts/socket.io.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
-  <script>
-    var sio = io.connect();
-    connect(sio, '/twitter/statuses/filter', {track:'Sydney'});
-    // connect(sio, '/twitter/statuses/sample');
-
-    function connect(sio, namespace, params) {
-      var socket = sio.socket.of(namespace);
-      socket
-        .on('error', function(reason) {
-          console.error('unable to connet to', namespace);
-        })
-        .on('connect', function() {
-          console.log('successfully established a connection to', namespace);
-          socket.emit('get', params);
-          socket.on('data', function(data) {
-            console.log('data', data);
-            $('.results').prepend('<li>' + data.text + '</li>').find(':gt(10):last').remove();
-          })
-          socket.on('disconnect', function() {
-            console.log('Socket was disconnected');
-          })
-        });
-    }
-  </script>
 </head>
 <body>
   <div><a href="/">&lt; Back</a></div>
-  <h3>Streamed Tweets</h3>
+  <h2>Streaming API</h2>
+  <div>
+    <label for="track">track: </label>
+    <input type="text" id="track" name="track" value="Sydney" />
+    <button onclick="search()">Search</button>
+  </div>
+  <h4>Streamed Tweets</h4>
   <ul class="results"></ul>
+  <script>
+    var sio = io.connect();
+    var socket = sio.socket.of('/twitter/statuses/filter');
+    socket
+      .on('error', function(reason) {
+        console.error('unable to connet to the namespace');
+      })
+      .on('connect', function() {
+        console.log('successfully established a connection to the namespace');
+        search();
+        
+        socket.on('data', function(data) {
+          console.log('data', data);
+          $('.results').prepend('<li>' + data.text + '</li>').find(':gt(10):last').remove();
+        })
+        socket.on('disconnect', function() {
+          console.log('Socket was disconnected');
+        })
+      });
+
+    function search() {
+      socket.emit('get', {
+        track: $('input[name="track"]').val()
+      });
+    }
+  </script>
 </body>
 </html>
