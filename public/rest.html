@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>REST API Test</title>
+  <style type="text/css">
+    input[type="text"] {
+      width: 300px;
+    }
+  </style>
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript">
+    function ajax() {
+      $('.result').html('loading');
+
+      $.ajax({
+        url: '/twitter/' + $('input[name="resource"]').val(),
+        type: $('input[name="method"]:radio:checked').val(),
+        data: $('input[name="data"]').val(),
+        success: function(data) {
+          console.log(data);
+          $('.result').html(JSON.stringify(data, undefined, 2));
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error('Error', jqXHR, textStatus, errorThrown);
+          $('.result').html(errorThrown);
+        }
+      })
+    }
+  </script>
+</head>
+<body>
+  <div><a href="/">&lt; Back</a></div>
+  <div>
+    <label for="resource">Resource: </label>
+    <input type="text" id="resource" name="resource" value="account/verify_credentials.json" />
+  </div>
+  <div>
+    <label for="data">Params: </label>
+    <input type="text" id="data" name="data" value="include_entities=true&skip_status=true" />
+  </div>
+  <div>
+    <label for="get">GET</label>
+    <input type="radio" id="get" name="method" value="GET" checked />
+    <label for="post">POST</label>
+    <input type="radio" id="post" name="method" value="POST" />
+  </div>
+  <div>
+    <button onclick="ajax()">Request</button>
+  </div>
+  <h3>Results:</h3>
+  <pre class="result"></pre>
+</body>
+</html>
