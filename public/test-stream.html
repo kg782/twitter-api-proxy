@@ -7,9 +7,15 @@
   <!-- <link rel="stylesheet" href=""> -->
   <script src="scripts/socket.io.min.js" type="text/javascript" charset="utf-8"></script>
   <script>
-    var socket = io.connect('http://127.0.0.1:3000');
-    socket.on('data', function(data) {
-      if(window.console) {console.log(data);}
+    var socket = io.connect('/twitter/statuses/filter');
+    socket.on('connect', function() {
+      socket.emit('get', {track:'Sydney'});
+      socket.on('data', function(data) {
+        console.log('data', data);
+      })
+      socket.on('disconnect', function() {
+        console.log('Socket was disconnected');
+      })
     })
   </script>
 </head>
