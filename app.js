@@ -83,9 +83,8 @@ app.get(configs.API_PATH + '/logout', twitter.logout);
 app.get(configs.API_PATH + '/error-auth', twitter.errorAuth);
 
 // Twitter API
-app.get(configs.API_PATH + '/rest/*', twitter.ensureAuthenticated, twitter.restGet);
-app.post(configs.API_PATH + '/rest/*', twitter.ensureAuthenticated, twitter.restPost);
-// app.get(configs.API_PATH + '/stream/*', twitter.ensureAuthenticated, twitter.stream);
+app.get(configs.API_PATH + '/*', twitter.ensureAuthenticated, twitter.restGet);
+app.post(configs.API_PATH + '/*', twitter.ensureAuthenticated, twitter.restPost);
 
 // development only
 if ('development' == app.get('env')) {

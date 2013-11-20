@@ -5,11 +5,36 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title></title>
   <link rel="stylesheet" href="">
+  <style type="text/css">
+    .needsLogout, .needsLogin {
+      display: none;
+    }
+  </style>
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript">
+    $(function() {
+      $.get('/twitter/authenticated', function(data) {
+        console.log('Auth', data);
+
+        if (data.authenticated) {
+          $('.needsLogout').hide();
+          $('.needsLogin').show();
+        } else {
+          $('.needsLogout').show();
+          $('.needsLogin').hide();
+        }
+      })
+    })
+  </script>
 </head>
 <body>
   <div>
-    <a href="twitter/login">Log in</a>
-    <a href="twitter/logout">Log out</a>
+    <a class="needsLogout" href="twitter/login">Log in</a>
+    <a class="needsLogin" href="twitter/logout">Log out</a>
   </div>
+  <ul>
+    <li class="needsLogin"><a href="rest.html">Test REST API</a></li>
+    <li class="needsLogin"><a href="stream.html">Test Streaming API</a></li>
+  </ul>
 </body>
 </html>

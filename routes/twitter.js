@@ -12,9 +12,7 @@ exports.callback = function(req, res) {
 };
 exports.logout = function(req, res){
   req.logout();
-  res.send({
-    authenticated: false
-  });
+  res.redirect('/');
 };
 exports.authenticated = function(req, res) {
   var user = req.user ? req.user._json : null;
@@ -45,7 +43,7 @@ exports.restGet = function(req, res) {
     access_token_secret: req.user.tokenSecret
   });
 
-  var url = req.path.replace(configs.API_PATH + '/rest', '');
+  var url = req.path.replace(configs.API_PATH, '');
   console.log('Get request, url:', url, ', params:', req.query);
   twit.get(url, req.query, function(err, data) {
     if (err) {
@@ -65,7 +63,7 @@ exports.restPost = function(req, res) {
     access_token_secret: req.user.tokenSecret
   });
 
-  var url = req.path.replace(configs.API_PATH + '/rest', '');
+  var url = req.path.replace(configs.API_PATH, '');
   console.log('Post request, url:', url, ', content:', req.body);
   twit.post(url, req.body, null, function(err, data) {
     if (err) {
