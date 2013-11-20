@@ -5,7 +5,6 @@
 
 var express = require('express');
 var twitter = require('./routes/twitter');
-var debug = require('./routes/debug');
 var http = require('http');
 var path = require('path');
 var configs = require('./configs');
@@ -39,13 +38,12 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function callback () {console.log('mongoose connected');});
 require('./models/user');
-require('./models/session');
 
 // Passport settings
 passport.use(new TwitterStrategy({
     consumerKey: configs.TWITTER_CONSUMER_KEY,
     consumerSecret: configs.TWITTER_CONSUMER_SECRET,
-    callbackURL: configs.SITE_URL + '/twitter/callback'
+    callbackURL: '/twitter/callback'
   },
   function(token, tokenSecret, profile, done) {
     profile.token = token;
