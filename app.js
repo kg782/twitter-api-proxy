@@ -19,19 +19,6 @@ var connect = require('express/node_modules/connect');
 var app = express();
 var sessionStore = new MongoStore(configs.MONGO_DB);
 
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-  if (id) {
-    var User = mongoose.model('User');
-    User.findById(id, function(err, user) {
-      done(err, user);
-    });
-  }
-});
-
 // mongoose setup
 mongoose.connect(configs.MONGO_DB_URL);
 var db = mongoose.connection;
@@ -54,6 +41,19 @@ passport.use(new TwitterStrategy({
     });
   }
 ));
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  if (id) {
+    var User = mongoose.model('User');
+    User.findById(id, function(err, user) {
+      done(err, user);
+    });
+  }
+});
 
 // all environments
 app.set('port', process.env.PORT || 3000);
