@@ -3,22 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Streaming API - statuses/filter</title>
+  <title>Streaming API - site</title>
   <script src="scripts/socket.io.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div><a href="/">&lt; Back</a></div>
-  <h2>Streaming API - statuses/filter</h2>
+  <h2>Streaming API - site</h2>
   <div>
-    <label for="track">track: </label>
-    <input type="text" id="track" name="track" value="Sydney" />
+    <label for="follow">follow: </label>
+    <input type="text" id="follow" name="follow" value="228286566,31233850,14863274,1901171580,1108969658,770788225,783214,50090898,20536157,13334762,372475592,588938505,1202090827,553090178,22938914,14822853,1425295999,1335669330,158704969,1636590253,794496330,91985735,18484975,202230373,271380768,176724367,359363142,202969621,219573919,595502508,290864535,38394058,99008565,88843805,245677083,217352966,21052033,235455569,99853411,14263044,2149061" />
   </div>
   <button onclick="search()">Search</button>
   <h4>Streamed Tweets</h4>
   <ul class="results"></ul>
   <script>
-    var socket = io.connect('/twitter/statuses/filter')
+    var socket = io.connect('/twitter/site')
       .on('error', function() {
         console.error('unable to connet to the namespace');
       })
@@ -35,9 +35,12 @@
       });
 
     function search() {
-      socket.emit('query', {
-        track: $('input[name="track"]').val()
-      });
+      var params = {};
+      var follow = $('input[name="follow"]').val();
+      if (follow && follow.length) {
+        params.follow = follow;
+      }
+      socket.emit('query', params);
     }
   </script>
 </body>

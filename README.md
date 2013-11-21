@@ -41,14 +41,12 @@ Parameters: Parameters are passed to call twitter API
 
 ## Streaming API
 
-`Twitter Streaming API` allows only one connection from server to Twitter at a time. So the proxy shares the connection and broadcasts to every stream connections of namespace `/twitter`.
-
-  To connect and listen the events,
+To connect and listen the events. `Socket.IO` namespaces are corresponding to Twitter API endpoints. In this case, accessing `statuses/sample` endpoint.
 
   ```
-  var socket = io.connect('/twitter');
+  var socket = io.connect('/twitter/statuses/sample');
   socket
-    .on('error', function(reason) {
+    .on('error', function() {
       console.error('unable to connet to the namespace');
     })
     .on('connect', function() {
@@ -61,17 +59,30 @@ Parameters: Parameters are passed to call twitter API
       console.log('data', data);
     });
   ```
+### statuses/filter
 
-  To query the streaming API,
+namespace: /twitter/statuses/filter
+
+Streams to Twitter are established for each user. To query the streaming API,
 
   ```
   socket.emit('query', {
-    method: 'statuses/filter',
-    params: {
-      track: 'Sydney'
-    }
+    track: $('input[name="track"]').val()
   });
   ```
+
+### statuses/sample
+
+namespace: /twitter/statuses/sample
+
+Server shares only one stream connection to Twitter and broadcasts to all clients as the response of `statuses/sample` is identical for each clients. The streaming is done by developers access token then user doesn't need to authenticate to access this API.
+
+
+### user
+
+namespace: /twitter/user
+
+It requires user authentication.
 
 ## License
 

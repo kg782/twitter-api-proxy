@@ -14,7 +14,7 @@
   <ul class="results"></ul>
   <script>
     var socket = io.connect('/twitter/statuses/sample')
-      .on('error', function(reason) {
+      .on('error', function() {
         console.error('unable to connet to the namespace');
       })
       .on('connect', function() {
