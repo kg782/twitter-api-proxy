@@ -9,15 +9,21 @@
 * [Node.js](http://nodejs.org/)
 * [MongoDB](http://www.mongodb.org/)
 
-## Install
+## Install and start
 
 1. Install `npm` dependencies in project directory.
 
-```
-npm install
-```
+  ```
+  $ npm install
+  ```
 
 2. Rename configs.js.sample to configs.js and update for your environment.
+
+3. Start server
+
+  ```
+  $ node app.js
+  ```
 
 ## Twitter authentication
 
