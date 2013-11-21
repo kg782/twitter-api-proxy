@@ -85,7 +85,7 @@ exports.stream = function(socket) {
   var method = socket.namespace.name.replace(configs.API_PATH + '/', '');
 
   socket.on('get', function(data) {
-    establishStreaming(socket, method, data, socket.handshake.user.token, socket.handshake.user.tokenSecret);
+    establishStreaming(socket.namespace, data.method, data.params);
   });
 
   socket.on('disconnect', function() {
@@ -93,31 +93,12 @@ exports.stream = function(socket) {
   });
 };
 
-var statusesSampleStream = null;
-exports.streamStatusesSample = function(socket) {
-  console.log('A socket with socketId ' + socket.id + ' joined to statuses/sample!');
-
-  if (!statusesSampleStream) {
-    console.log('Establish status/sample streaming');
-    statusesSampleStream = establishStreaming(
-      socket.namespace,
-      'statuses/sample',
-      null,
-      configs.TWITTER_ACCESS_TOKEN,
-      configs.TWITTER_ACCESS_TOKEN_SECRET);
-  }
-
-  socket.on('disconnect', function() {
-    console.log('A socket with socketId ' + socket.id + ' left to statuses/sample!');
-  });
-};
-
-function establishStreaming(socket, method, params, accessTokenKey, accessTokenSecret) {
+function establishStreaming(socket, method, params) {
   var twit = new Twitter({
     consumer_key: configs.TWITTER_CONSUMER_KEY,
     consumer_secret: configs.TWITTER_CONSUMER_SECRET,
-    access_token_key: accessTokenKey,
-    access_token_secret: accessTokenSecret
+    access_token_key: configs.TWITTER_ACCESS_TOKEN,
+    access_token_secret: configs.TWITTER_ACCESS_TOKEN_SECRET
   });
 
   twit.stream(method, params, function(stream) {

@@ -41,35 +41,36 @@ Parameters: Parameters are passed to call twitter API
 
 ## Streaming API
 
-`statuses/filter`, `user` and `site` endpoints requires authentication before access. `statuses/sample` doesn't require authentication and only one streaming connection from the proxy to the twitter Streaming API is shared among clients.
+`Twitter Streaming API` allows only one connection from server to Twitter at a time. So the proxy shares the connection and broadcasts to every stream connections of namespace `/twitter`.
 
-`namespace` of `Socket.IO` is used to determine Twitter `Streaming API` endpoints. Then `emit('get', params)` to start receiving streaming data.
+  To connect and listen the events,
 
-  ```html
-  <script src="scripts/socket.io.min.js" type="text/javascript" charset="utf-8"></script>
-  <script>
-    var sio = io.connect();
-    connect(sio, '/twitter/statuses/filter', {track:'Sydney'});
+  ```
+  var socket = io.connect('/twitter');
+  socket
+    .on('error', function(reason) {
+      console.error('unable to connet to the namespace');
+    })
+    .on('connect', function() {
+      console.log('successfully established a connection to the namespace');
+    })
+    .on('disconnect', function() {
+      console.log('Socket was disconnected');
+    })
+    .on('data', function(data) {
+      console.log('data', data);
+    });
+  ```
 
-    function connect(sio, namespace, params) {
-      var socket = sio.socket.of(namespace);
-      socket
-        .on('error', function(reason) {
-          console.error('unable to connet to', namespace);
-        })
-        .on('connect', function() {
-          console.log('successfully established a connection to', namespace);
-          socket.emit('get', params);
-          socket.on('data', function(data) {
-            console.log('data', data);
-          })
-          socket.on('disconnect', function() {
-            console.log('Socket was disconnected');
-          })
-        });
+  To query the streaming API,
+
+  ```
+  socket.emit('get', {
+    method: 'statuses/filter',
+    params: {
+      track: 'Sydney'
     }
-  </script>
-
+  });
   ```
 
 ## License
