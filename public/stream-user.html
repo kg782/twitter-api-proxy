@@ -24,8 +24,12 @@
         console.log('Socket was disconnected');
       })
       .on('data', function(data) {
-        // console.log('data', data);
-        $('.results').prepend('<li>' + data.text + '</li>').find(':gt(10):last').remove();
+        console.log('data', data);
+        if (data.text) {
+          $('.results').prepend('<li>' + data.text + '</li>').find(':gt(10):last').remove();
+        } else if (data.friends) {
+          $('.results').prepend('<li>friends: ' + data.friends.length + '</li>').find(':gt(10):last').remove();
+        }
       });
   </script>
 </body>
