@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Streaming API - user</title>
+  <script src="scripts/socket.io.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+  <div><a href="/">&lt; Back</a></div>
+  <h2>Streaming API - user</h2>
+  <h4>Streamed Tweets</h4>
+  <ul class="results"></ul>
+  <script>
+    var socket = io.connect('/twitter/user')
+      .on('error', function() {
+        console.error('unable to connet to the namespace');
+      })
+      .on('connect', function() {
+        console.log('successfully established a connection to the namespace');
+      })
+      .on('disconnect', function() {
+        console.log('Socket was disconnected');
+      })
+      .on('data', function(data) {
+        // console.log('data', data);
+        $('.results').prepend('<li>' + data.text + '</li>').find(':gt(10):last').remove();
+      });
+  </script>
+</body>
+</html>

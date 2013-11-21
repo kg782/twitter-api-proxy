@@ -5,7 +5,6 @@
 
 var express = require('express');
 var twitter = require('./routes/twitter');
-var debug = require('./routes/debug');
 var http = require('http');
 var path = require('path');
 var configs = require('./configs');
@@ -20,6 +19,29 @@ var connect = require('express/node_modules/connect');
 var app = express();
 var sessionStore = new MongoStore(configs.MONGO_DB);
 
+// mongoose setup
+mongoose.connect(configs.MONGO_DB_URL);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function callback () {console.log('mongoose connected');});
+require('./models/user');
+
+// Passport settings
+passport.use(new TwitterStrategy({
+    consumerKey: configs.TWITTER_CONSUMER_KEY,
+    consumerSecret: configs.TWITTER_CONSUMER_SECRET,
+    callbackURL: '/twitter/callback'
+  },
+  function(token, tokenSecret, profile, done) {
+    profile.token = token;
+    profile.tokenSecret = tokenSecret;
+    var User = mongoose.model('User');
+    User.findOrCreate(profile, function(err, user) {
+      return done(null, user);
+    });
+  }
+));
+
 passport.serializeUser(function(user, done) {
   done(null, user.id);
 });
@@ -32,30 +54,6 @@ passport.deserializeUser(function(id, done) {
     });
   }
 });
-
-// mongoose setup
-mongoose.connect(configs.MONGO_DB_URL);
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function callback () {console.log('mongoose connected');});
-require('./models/user');
-require('./models/session');
-
-// Passport settings
-passport.use(new TwitterStrategy({
-    consumerKey: configs.TWITTER_CONSUMER_KEY,
-    consumerSecret: configs.TWITTER_CONSUMER_SECRET,
-    callbackURL: configs.SITE_URL + '/twitter/callback'
-  },
-  function(token, tokenSecret, profile, done) {
-    profile.token = token;
-    profile.tokenSecret = tokenSecret;
-    var User = mongoose.model('User');
-    User.findOrCreate(profile, function(err, user) {
-      return done(null, user);
-    });
-  }
-));
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -125,9 +123,9 @@ sockets.configure('development', function() {
 });
 
 sockets.configure(function (){
+  sockets.of(configs.API_PATH).authorization(checkAuthorization);
   sockets.of(configs.API_PATH + '/statuses/filter').authorization(checkAuthorization);
   sockets.of(configs.API_PATH + '/user').authorization(checkAuthorization);
-  sockets.of(configs.API_PATH + '/site').authorization(checkAuthorization);
 });
 
 function checkAuthorization(handshakeData, callback) {
@@ -170,8 +168,9 @@ function checkAuthorization(handshakeData, callback) {
   }
 }
 
-sockets.of(configs.API_PATH + '/statuses/filter').on('connection', twitter.stream);
-sockets.of(configs.API_PATH + '/user').on('connection', twitter.stream);
-sockets.of(configs.API_PATH + '/site').on('connection', twitter.stream);
-// statuses/sample doesn't require authentication, use developers access token
+sockets.of(configs.API_PATH + '/statuses/filter').on('connection', twitter.streamStatusesFilter);
 sockets.of(configs.API_PATH + '/statuses/sample').on('connection', twitter.streamStatusesSample);
+sockets.of(configs.API_PATH + '/statuses/firehose').on('connection', twitter.streamStatusesFireHose);
+sockets.of(configs.API_PATH + '/user').on('connection', twitter.streamUser);
+sockets.of(configs.API_PATH + '/site').on('connection', twitter.streamSite);
+

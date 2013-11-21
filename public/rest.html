@@ -24,7 +24,7 @@
         },
         error: function(jqXHR, textStatus, errorThrown) {
           console.error('Error', jqXHR, textStatus, errorThrown);
-          $('.result').html(errorThrown);
+          $('.result').html('<pre>' + jqXHR.responseText + '</pre>');
         }
       })
     }
@@ -32,6 +32,7 @@
 </head>
 <body>
   <div><a href="/">&lt; Back</a></div>
+  <h2>REST API</h2>
   <div>
     <label for="resource">Resource: </label>
     <input type="text" id="resource" name="resource" value="account/verify_credentials.json" />
@@ -49,7 +50,7 @@
   <div>
     <button onclick="ajax()">Request</button>
   </div>
-  <h3>Results:</h3>
+  <h4>Results:</h4>
   <pre class="result"></pre>
 </body>
 </html>

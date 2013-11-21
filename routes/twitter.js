@@ -77,51 +77,59 @@ exports.restPost = function(req, res) {
 /*
  * Stream
  */
-
-// Indevisual stream per access, used for user, site and statuses/filter
-exports.stream = function(socket) {
-  console.log('A socket with sessionID ' + socket.handshake.sessionID + ' connected!');
-
-  var method = socket.namespace.name.replace(configs.API_PATH + '/', '');
-
-  console.log('method', method);
-  socket.on('get', function(data) {
-    establishStreaming(socket, method, data, socket.handshake.user.token, socket.handshake.user.tokenSecret);
-  });
-
-  socket.on('disconnect', function() {
-    console.log('A socket with sessionID ' + socket.handshake.sessionID + ' disconnected!');
+exports.streamStatusesFilter = function(socket) {
+  var stream = null;
+  socket.on('query', function(data) {
+    if (stream) {
+      stream.destroy();
+    }
+    stream = establishStream(socket, 'statuses/filter', data, socket.handshake.user.token, socket.handshake.user.tokenSecret);
+    observeStream(socket, stream);
   });
 };
 
-var statusesSampleStream = null;
+// Share only one sample stream conection among clients.
 exports.streamStatusesSample = function(socket) {
-  console.log('A socket with socketId ' + socket.id + ' joined to statuses/sample!');
+  var stream = establishSharedStream(socket, 'statuses/sample', null);
+  observeSharedStream(socket, stream);
+};
 
-  if (!statusesSampleStream) {
-    console.log('Establish status/sample streaming');
-    statusesSampleStream = establishStreaming(
-      socket.namespace,
-      'statuses/sample',
-      null,
-      configs.TWITTER_ACCESS_TOKEN,
-      configs.TWITTER_ACCESS_TOKEN_SECRET);
-  }
+// This API is not tested as it requires special permission to access
+// Share only one sample stream conection among clients.
+exports.streamStatusesFireHose = function(socket) {
+  establishSharedStream(socket, 'statuses/firehose', null);
+  observeSharedStream(socket, stream);
+};
 
-  socket.on('disconnect', function() {
-    console.log('A socket with socketId ' + socket.id + ' left to statuses/sample!');
+exports.streamUser = function(socket) {
+  var stream = establishStream(socket, 'user', null, socket.handshake.user.token, socket.handshake.user.tokenSecret);
+  observeStream(socket, stream);
+};
+
+// Not tested as this endpoint requires special permission
+exports.streamSite = function(socket) {
+  var stream = null;
+  socket.on('query', function(data) {
+    if (stream) {
+      stream.destroy();
+    }
+    stream = establishSharedStream(socket, 'site', data);
+    observeSharedStream(socket, stream);
   });
 };
 
-function establishStreaming(socket, method, params, accessTokenKey, accessTokenSecret) {
+function establishStream(socket, method, params, token, tokenSecret) {
   var twit = new Twitter({
     consumer_key: configs.TWITTER_CONSUMER_KEY,
     consumer_secret: configs.TWITTER_CONSUMER_SECRET,
-    access_token_key: accessTokenKey,
-    access_token_secret: accessTokenSecret
+    access_token_key: token,
+    access_token_secret: tokenSecret
   });
 
+  var s = null;
+
   twit.stream(method, params, function(stream) {
+    s = stream;
     stream.on('error', function() {
       console.log('stream error:', arguments);
       socket.emit('error', arguments);
@@ -132,6 +140,7 @@ function establishStreaming(socket, method, params, accessTokenKey, accessTokenS
     });
     stream.on('destroy', function(destroy) {
       console.log('stream destroy:', destroy);
+      stream.destroyed = true;
       socket.emit('destroy', destroy);
     });
     stream.on('limit', function(limit) {
@@ -152,5 +161,29 @@ function establishStreaming(socket, method, params, accessTokenKey, accessTokenS
     });
   });
 
-  return twit;
+  return s;
+}
+
+var sharedStreams = {};
+function establishSharedStream(socket, method, params) {
+  if (!sharedStreams[method] || sharedStreams[method].destroyed) {
+    sharedStreams[method] = establishStream(socket.namespace, method, params, configs.TWITTER_ACCESS_TOKEN, configs.TWITTER_ACCESS_TOKEN_SECRET);
+  }
+  return sharedStreams[method];
+}
+
+function observeStream(socket, stream) {
+  socket.on('disconnect', function() {
+    console.log('destroy a stream as user disconnected.');
+    stream.destroy();
+  });
+}
+
+function observeSharedStream(socket, stream) {
+  socket.on('disconnect', function() {
+    if (socket.namespace.clients().length <= 1) {
+      console.log('destroy a stream as there is no client listening.');
+      stream.destroy();
+    }
+  });
 }

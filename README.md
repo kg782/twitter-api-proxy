@@ -1,6 +1,8 @@
 # Twitter API Proxy
 
-`Twitter API Proxy` is a proxy server to `Twitter API` for pure front-end framework such as `Angular.js`. The concept is to separate front-end client completely from back-end. It supports Twitter `REST API` and `Streaming API`. Streaming data is streamed via `WebSocket` on `Socket.IO` in real time.
+`Twitter REST API v1.1` requires OAuth for every endpoints so you no longer be able to call it from front-end directly. Additionaly, `Twitter Streaming API` needs to be converted in browser compatible protocol such as `WebSocket` to get data in real-time. This proxy server solves those problems.
+
+`Twitter API Proxy` is designed for pure front-end framework such as [`Angular.js`](http://angularjs.org/). The concept is to separate front-end client completely from back-end. It supports Twitter `REST API` and `Streaming API`. Streaming data is streamed via `WebSocket` on `Socket.IO` in real time.
 
 ## Requirements
 
@@ -11,15 +13,15 @@
 
 1. Install `npm` dependencies in project directory.
 
-  ```
-  npm install
-  ```
+```
+npm install
+```
 
 2. Rename configs.js.sample to configs.js and update for your environment.
 
 ## Twitter authentication
 
-For secure reason, this proxy hides `consumer key` and `access token` from front-end clients. Those keys won't be exposed.
+This proxy hides `consumer key` and `access token` from front-end clients. Those keys won't be exposed.
 
 Clients `access token`s are kept in persistent storage (`MongoDB`) then retrieved by session without authorizing each time.
 
@@ -33,42 +35,68 @@ Access `/twitter/login`, it redirects twitter Auth page. `/twitter/logout` is to
 
 All endpoints of Twitter REST API v1.1 require authentication. Before access those API, clients need to authenticate.
 
-URL: /twitter/ + `twitter resource` (eg. `/twitter/account/verify_credentials.json` to `account/verify_credentials.json`)
-HTTP Method: HTTP Method to the proxy is used to access twitter API. If you access with GET method, twitter GET method is called.
-Parameters: Parameters are passed to call twitter API
+- URL: /twitter/ + `twitter resource` (eg. `/twitter/account/verify_credentials.json` to `account/verify_credentials.json`)
+- HTTP Method: HTTP Method to the proxy is used to access twitter API. If you access with GET method, twitter GET method is called.
+- Parameters: Parameters are passed to call twitter API
+
+```
+$.ajax({
+  url: '/twitter/account/verify_credentials.json',
+  type: 'GET',
+  success: function(data) {
+    console.log(data);
+  },
+  error: function(jqXHR, textStatus, errorThrown) {
+    console.error('Error', jqXHR, textStatus, errorThrown);
+  }
+})
+```
 
 ## Streaming API
 
-`statuses/filter`, `user` and `site` endpoints requires authentication before access. `statuses/sample` doesn't require authentication and only one streaming connection from the proxy to the twitter Streaming API is shared among clients.
+To connect and listen the events. `Socket.IO` namespaces are corresponding to Twitter API endpoints. In this case, accessing `statuses/sample` endpoint.
 
-`namespace` of `Socket.IO` is used to determine Twitter `Streaming API` endpoints. Then `emit('get', params)` to start receiving streaming data.
+```
+var socket = io.connect('/twitter/statuses/sample');
+socket
+  .on('error', function() {
+    console.error('unable to connet to the namespace');
+  })
+  .on('connect', function() {
+    console.log('successfully established a connection to the namespace');
+  })
+  .on('disconnect', function() {
+    console.log('Socket was disconnected');
+  })
+  .on('data', function(data) {
+    console.log('data', data);
+  });
+```
 
-  ```html
-  <script src="scripts/socket.io.min.js" type="text/javascript" charset="utf-8"></script>
-  <script>
-    var sio = io.connect();
-    connect(sio, '/twitter/statuses/filter', {track:'Sydney'});
+#### statuses/filter
 
-    function connect(sio, namespace, params) {
-      var socket = sio.socket.of(namespace);
-      socket
-        .on('error', function(reason) {
-          console.error('unable to connet to', namespace);
-        })
-        .on('connect', function() {
-          console.log('successfully established a connection to', namespace);
-          socket.emit('get', params);
-          socket.on('data', function(data) {
-            console.log('data', data);
-          })
-          socket.on('disconnect', function() {
-            console.log('Socket was disconnected');
-          })
-        });
-    }
-  </script>
+namespace: `/twitter/statuses/filter`
 
-  ```
+Streams to Twitter are established for each user. To query the streaming API,
+
+```
+socket.emit('query', {
+  track: $('input[name="track"]').val()
+});
+```
+
+#### statuses/sample
+
+namespace: `/twitter/statuses/sample`
+
+Server shares only one stream connection to Twitter and broadcasts to all clients as the response of `statuses/sample` is identical for each clients. The streaming is done by developers access token then user doesn't need to authenticate to access this API.
+
+
+#### user
+
+namespace: `/twitter/user`
+
+It requires user authentication.
 
 ## License
 
