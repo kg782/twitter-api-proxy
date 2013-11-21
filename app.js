@@ -122,4 +122,55 @@ sockets.configure('development', function() {
   sockets.set('log level', 2);
 });
 
-sockets.of(configs.API_PATH).on('connection', twitter.stream);
+sockets.configure(function (){
+  sockets.of(configs.API_PATH).authorization(checkAuthorization);
+  sockets.of(configs.API_PATH + '/statuses/filter').authorization(checkAuthorization);
+  sockets.of(configs.API_PATH + '/user').authorization(checkAuthorization);
+});
+
+function checkAuthorization(handshakeData, callback) {
+  // check if there's a cookie header
+  if (handshakeData.headers.cookie) {
+    // if there is, parse the cookie
+    var cookies = cookie.parse(decodeURIComponent(handshakeData.headers.cookie));
+    handshakeData.cookie = connect.utils.parseSignedCookies(cookies, configs.COOKIE_SECRET);
+    
+    // note that you will need to use the same key to grad the
+    // session id, as you specified in the Express setup.
+    handshakeData.sessionID = handshakeData.cookie['connect.sid'];
+    sessionStore.get(handshakeData.sessionID, function(err, session) {
+      if (err || !session) {
+        return callback('No session existed', false);
+      } else {
+        handshakeData.session = session;
+
+        if (!session.passport || !session.passport.user) {
+          return callback('No passport user', false);
+        } else {
+          var userId = session.passport.user;
+          passport.deserializeUser(userId, function(err, user) {
+            if (err || !user) {
+              return callback('No user stored', false);
+            } else {
+              handshakeData.user = user;
+
+              // callback the incoming connection
+              callback(null, true);
+            }
+          });
+        }
+      }
+    });
+  } else {
+    // if there isn't, turn down the connection with a message
+    // and leave the function.
+    return callback('No cookie transmitted.', false);
+  }
+}
+
+sockets.of(configs.API_PATH + '/statuses/filter').on('connection', twitter.streamStatusesFilter);
+sockets.of(configs.API_PATH + '/statuses/sample').on('connection', twitter.streamStatusesSample);
+sockets.of(configs.API_PATH + '/statuses/firehose').on('connection', twitter.streamStatusesFireHose);
+sockets.of(configs.API_PATH + '/user').on('connection', twitter.streamUser);
+sockets.of(configs.API_PATH + '/site').on('connection', twitter.streamSite);
+

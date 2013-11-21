@@ -21,7 +21,7 @@
 
 ## Twitter authentication
 
-For secure reason, this proxy hides `consumer key` and `access token` from front-end clients. Those keys won't be exposed.
+This proxy hides `consumer key` and `access token` from front-end clients. Those keys won't be exposed.
 
 Clients `access token`s are kept in persistent storage (`MongoDB`) then retrieved by session without authorizing each time.
 
@@ -65,7 +65,7 @@ Parameters: Parameters are passed to call twitter API
   To query the streaming API,
 
   ```
-  socket.emit('get', {
+  socket.emit('query', {
     method: 'statuses/filter',
     params: {
       track: 'Sydney'
