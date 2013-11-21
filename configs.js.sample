@@ -13,11 +13,10 @@ exports.COOKIE_SECRET = '';
 
 // MongoDB
 exports.MONGO_DB = {
-    db: 'twitter_proxy'
-    // host: '127.0.0.1',
-    // port: 27017,
-    // username: '',
-    // password: '',
-    // collection: ''
+  db: 'twitter_proxy',
+  host: '127.0.0.1',
+  port: 27017,
+  username: '',
+  password: '',
+  collection: ''
 };
-exports.MONGO_DB_URL = 'mongodb://localhost/twitter_proxy';

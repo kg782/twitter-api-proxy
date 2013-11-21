@@ -20,7 +20,7 @@ var app = express();
 var sessionStore = new MongoStore(configs.MONGO_DB);
 
 // mongoose setup
-mongoose.connect(configs.MONGO_DB_URL);
+mongoose.connect('mongodb://' + configs.MONGO_DB.host + ':' + configs.MONGO_DB.port + '/' + configs.MONGO_DB.db);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function callback () {console.log('mongoose connected');});
