@@ -14,6 +14,8 @@
 1. Install `npm` dependencies in project directory.
 
   ```
+  $ git clone https://github.com/kg782/twitter-api-proxy
+  $ cd twitter-api-proxy
   $ npm install
   ```
 
