@@ -1,6 +1,6 @@
 {
   "name": "twitter-api-proxy",
-  "version": "0.1",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "node app.js"

@@ -9,15 +9,23 @@
 * [Node.js](http://nodejs.org/)
 * [MongoDB](http://www.mongodb.org/)
 
-## Install
+## Install and start
 
 1. Install `npm` dependencies in project directory.
 
-```
-npm install
-```
+  ```
+  $ git clone https://github.com/kg782/twitter-api-proxy
+  $ cd twitter-api-proxy
+  $ npm install
+  ```
 
 2. Rename configs.js.sample to configs.js and update for your environment.
+
+3. Start server
+
+  ```
+  $ node app.js
+  ```
 
 ## Twitter authentication
 
